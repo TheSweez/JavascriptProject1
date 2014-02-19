@@ -1,0 +1,299 @@
+<!DOCTYPE HTML>
+<!-- Dan Swezey -->
+<!-- SD1 Project 1: JavaScript game -->
+<!-- Things to fix:
+    -Put nothing worth looting here in the taDisplay instead of taItemDisplay
+    -Make it so you need the med supply key to loot med supply room.
+    -Make it so you leave entrance with master key from med room
+    -Make the death background work -->
+<html>
+   <head>
+      <title>Stitches</title>
+	  
+      <script>
+		function init(){
+			document.getElementById("taStart").innerHTML = "It's cold and dark.  You look around you quickly.  The room wreaks of isolation and abandonment.  You find yourself on an operating table with several rusty tools scattered across the adjacent table.  Desperately, you call out a bold 'hello?', but there is no response.  You know what this means.  There is nobody here.  And there hasn't been anybody here in a very long time.  You must get out...and fast!";
+            document.getElementById("taDisplay").innerHTML = "*Press any direction or input any command to start*" + "\n\n" +"You are in the Operating Room A" + "\n" + "This is where you woke up.";
+        }
+         // Global Variables
+		 var currentLocale = 0;
+		 var msg = "";
+		 var before = "";
+         var score = 5;
+         var key = 0;
+		 
+		  //Set up the navigation matrix.
+		  var nav =           [//N   S   E   W
+		 /*nav[0] for map 0*/  [ 7 ,-1 , 1 ,-1, 0 ],
+		 /*nav[1] for map 1*/  [ 8 ,-1 , 2 , 0, 5 ],
+		 /*nav[2] for map 2*/  [ 9 ,-1 , 3 , 1, 5 ],
+		 /*nav[3] for map 3*/  [ 10,-1 , 4 , 2, 5 ],
+		 /*nav[4] for map 4*/  [ 10,-1 , 5 , 3, 5 ],
+		 /*nav[5] for map 5*/  [ 6 ,-1 ,-1 , 4, 5 ],
+		 /*nav[6] for map 6*/  [-1 , 5 ,-1 ,10, 5 ],
+		 /*nav[7] for map 7*/  [-1 , 0 , 8 ,-1, 5 ],
+		 /*nav[8] for map 8*/  [-1 , 1 , 9 , 7, 5 ],
+		 /*nav[9] for map 9*/  [-1 , 2 , 10, 8, 5 ],
+		 /*nav[10]for map 10*/ [-1 , 3 ,-1 , 9, 5 ]];
+         
+		 //navigation
+		 function move(dir) {
+		  var newLocale;       
+		    // Can not go that way
+			newLocale = nav[currentLocale][dir];
+               
+				if (newLocale != -1){
+                score+=nav[newLocale][4];
+				nav[newLocale][4] = 0;
+                document.getElementById("taScore").innerHTML = score;
+				before = map[currentLocale].name +"\n" + map[currentLocale].desc + "\n" + before;
+				document.getElementById("taDisplay").innerHTML = map[newLocale].name + "\n" + map[newLocale].desc + "\n" + before;
+				currentLocale = newLocale;
+			} else {
+				before = map[currentLocale].name + "\n" + before;
+				document.getElementById("taDisplay").innerHTML = map[currentLocale].name + "\n" + map[currentLocale].desc + "\n" + before;
+				document.getElementById("taDisplay").innerHTML = "You can't go that way ya dingus!" + "\n" + before; 
+				
+			}
+            if(currentLocale == 2 && key == 2){
+                document.writeln("You thrust open the door to finally taste the fresh, outdoor air.  <br> Looking around, you search to find someone to explain the strange, empty hospital.<br>  However, all you can see are empty cars strewn throughout the road.<br>  Not a soul is nearby.<br>  There is no sign of human life.<br>  You are still alone.<br>  The end.");
+            } 
+         }
+		 
+		 //Prototypes
+		 function Locale(id) {
+			this.name="";
+			this.id=id;
+			this.desc="";
+			this.item="";
+			this.toString= function(){
+			return "[Locale id=" + this.id + " name=" + this.name + " desc=" + this.desc + " item=" +this.item+"]";
+            
+			}
+		 }
+		 function Item(id){
+			this.id=id;
+			this.name="";
+			this.desc="";
+			this.toString= function(){
+			return "[item id=" + this.id + " name=" + this.name + " desc=" + this.desc + "]";
+            }
+		}
+		 
+		    map = new Array;
+			map[0] = new Locale(0);
+			map[0].name = "Operation Room A";
+			map[0].desc = "This is where you woke up";
+			map[0].item = "-Needle";
+			map[1] = new Locale(1);
+			map[1].name = "Operation Room B";
+			map[1].desc = "Where are all the doctors?";
+			map[1].item = "-Scalpel";
+			map[2] = new Locale(2);
+			map[2].name = "Entrance";
+			map[2].desc = "Seems to be locked. There must be a master key somewhere!";
+			map[2].item = "Null";
+			map[3] = new Locale(3);
+			map[3].name = "Waiting Room";
+			map[3].desc = "So empty...";
+			map[3].item = "Null";
+			map[4] = new Locale(4);
+			map[4].name = "Bathroom";
+		    map[4].desc = "Smells horrific";
+			map[4].item = "-Toilet Papar";
+			map[5] = new Locale(5);
+			map[5].name = "Janitor's Closet";
+			map[5].desc = "What can I find in here?";
+			map[5].item = "-Supply Closet Key";
+			map[6] = new Locale(6);
+			map[6].name = "Emergency Exit";
+			map[6].desc = "Seems to be locked. There has to be a master key somewhere!";
+			map[6].item = "Null"
+			map[7] = new Locale(7);
+			map[7].name = "Recovery Room A";
+			map[7].desc = "That bed looked like it was comfortable";
+			map[7].item = "Null";
+			map[8] = new Locale(8);
+			map[8].name = "Recovery Room B";
+			map[8].desc = "There's dust everywhere";
+			map[8].item = "Null";
+			map[9] = new Locale(9);
+			map[9].name = "Medical Supply Room";
+			map[9].desc = "Is locked. I wonder if there is a key to open it."
+			map[9].item = "-Master Key";
+			map[10] = new Locale(10);
+			map[10].name = "Cafeteria";
+			map[10].desc = "What a mess";
+			map[10].item = "-Apple";
+		 
+		 
+			inventory = new Array;
+			inventory[0] = new Item(0);
+			inventory[0].name = map[0].item;
+			inventory[0].desc = "*A rusty needle*" + "\n";
+			inventory[1] = new Item(1);
+			inventory[1].name = map[1].item;
+			inventory[1].desc = "*Spotted with blood!*" + "\n";
+			inventory[2] = new Item(2);
+			inventory[2].name = "Nothing worth looting here";
+			inventory[3] = new Item(3);
+			inventory[3].name = "Nothing worth looting here";
+			inventory[4] = new Item(4);
+			inventory[4].name = map[4].item;
+			inventory[4].desc = "*This looks like it could come in handy*" + "\n";
+			inventory[5] = new Item(5);
+			inventory[5].name = map[5].item;
+			inventory[5].desc = "*Looks like this will open up the Medical Supply Closet*" + "\n";
+			inventory[6] = new Item(6);
+			inventory[6].name = "Nothing worth looting here";
+			inventory[7] = new Item(7);
+			inventory[7].name = "Nothing worth looting here";
+			inventory[8] = new Item(8);
+			inventory[8].name = "Nothing worth looting here";
+			inventory[9] = new Item(9);
+			inventory[9].name = map[9].item;
+			inventory[9].desc = "*This is my way out of here!*" + "\n";
+			inventory[10] = new Item(10);
+			inventory[10].name = map[10].item;
+			inventory[10].desc = "*A rotting apple*" + "\n";
+			
+			var displayItems = "Inventory:\n";
+			var isDisplayed = false;
+
+            function invShowHide(){
+            var i = document.getElementById("taItemDisplay");
+            if(isDisplayed == false)
+            {
+                i.style.display = "inline";
+                isDisplayed = true;
+            }else{
+                i.style.display = "none";
+                isDisplayed = false;
+            }
+        }
+
+
+		 // Other commands besides directions
+		 function otherTexts(com){
+			switch(com){
+			case "0"://help
+				before = before+ " " + msg;
+				document.getElementById("taDisplay").innerHTML = "Help Commands:\n Type:\n h = help \n n = north \n s = south \n e = east \n w = west \n i = inventory \n l = look for loot" + before;
+			break;
+			case "1"://Inventory
+			
+			invShowHide();
+			
+			break;
+			case "2"://take
+			if(inventory[currentLocale].name!="Taken" && inventory[currentLocale].name!="Nothing worth looting here"){
+            if(currentLocale == 5){
+                key=1;
+            }
+            if((currentLocale==9&&key==1)||currentLocale!=9){
+			displayItems += "\n" + inventory[currentLocale].name +"\n" + inventory[currentLocale].desc;
+			document.getElementById("taItemDisplay").innerHTML = displayItems;
+            inventory[currentLocale].name="Taken";
+            }
+            if(currentLocale == 9 && key == 1){
+                key=2;
+            }
+			}else if(inventory[currentLocale].name=="Nothing worth looting here")
+            {
+			document.getElementById("taDisplay").innerHTML = inventory[currentLocale].name + "\n" + before;
+            before = inventory[currentLocale].name + "\n" + before;
+            }
+			break;
+            case "3"://Suicide
+                document.writeln("You take the easy way out");     
+            break;
+			}
+		 }
+		 
+		 //Different inputs for text commands
+		 function commandInputs(){
+			var text = document.getElementById('taInput');
+			var command = text.value;
+			switch (command){
+				case "n": move('0');
+				break;
+				case "s": move('1');
+				break;
+				case "e": move('2');
+				break;
+				case "w": move('3');
+				break;
+				case "h": otherTexts('0');
+				break;
+				case "i": otherTexts('1');
+				break;
+				case "t": otherTexts('2');
+				break;
+                case "d": otherTexts('3');
+				default: document.getElementById("taDisplay").innerHTML = msg;
+				break;
+			}
+			document.getElementById("taInput").value = "";
+		 }
+		 
+		 
+		 
+		 
+      </script>
+   </head>
+   <body onload="init();" bgcolor="#FF0000">
+      <h2>Stitches</h2>
+      <textarea id="taStart" style="width:155px; height:400px;" readonly = "readonly">
+      </textarea>
+	  <textarea id="taDisplay" style="width:400px; height:400px;" readonly = "readyonly">
+      </textarea>
+      <textarea id="taItemDisplay" style="width:150px; height:400px; display:none" readonly = "readyonly">
+Inventory:
+      </textarea>
+      Help:          <textarea id="taHelp" style="width:300px; height:130px;" readonly = "readonly">
+Type:   h: Help
+        n: North
+        s: South
+        e: East
+        w: West
+        i: Toggle Inventory
+        l: Take Items
+        d: Death(Suicide)
+       </textarea>
+      Score:           <textarea id="taScore" style="width:50px; height:30px;" readonly = "readyonly">
+      5</textarea>
+      
+      <br>
+      
+		&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp 
+		<input type="button"
+			   value = "North";
+		       onclick="move('0')";>
+		&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
+		Text commands:<input type="textarea"
+			   id = "taInput"
+			   onkeydown="if (event.keyCode == 13) document.getElementById('btnGo').click()">
+		<!-- Press enter!!!! -->
+		<input type="button"
+			   value="Enter"
+			   id="btnGo"
+			   onclick="commandInputs()";>
+		<br>
+	    <br>
+	    <input type="button"
+			   value = "West"
+			   onclick="move('3')";>
+		&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
+		<input type="button"
+			   value = "East"
+			   onclick="move('2')";>
+	    <br>
+	    <br>
+		&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
+		<input type="button"
+			   value = "South"
+			   onclick="move('1')";>
+	    <br>
+		<img src="hospital map finished.png" width = "900" height = "400">
+   </body>
+</html>
